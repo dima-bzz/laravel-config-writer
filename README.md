@@ -33,7 +33,40 @@ CONFIG_WRITER=config
 ...
 ```
 
-After you've configured everything you should clear the application config cache via `artisan config:clear`.
+You can optionally publish the config file with:
+```bash
+php artisan vendor:publish --tag="config-writer"
+```
+
+After you've configured everything you should run the command `artisan config:clear` or `artisan config:cache`.
+
+## Introduction
+
+The default is strict write mode. If you wish, you can change it in the configuration file:
+
+```php
+...
+strict => false
+...
+```
+
+Or through the Facade:
+
+```php
+use DimaBzz\LaravelConfigWriter\Facades\ConfigWriter
+...
+ConfigWriter::of([
+    'item' => 'new value',
+    'nested.config.item' => 'value',
+    'arrayItem' => ['Single', 'Level', 'Array', 'Values'],
+    'numberItem' => 3,
+    'booleanItem' => true
+])
+->strictMode(false)
+->write();
+...
+```
+
 
 ## Usage the helper
 
@@ -66,10 +99,7 @@ config_writer('config-writer', [
 You can write new data to the config file like this:
 
 ```php
-use DimaBzz\LaravelConfigWriter\Facades\ConfigWriter
-
 ...
-
 ConfigWriter::write([
     'item' => 'new value',
     'nested.config.item' => 'value',
@@ -77,22 +107,23 @@ ConfigWriter::write([
     'numberItem' => 3,
     'booleanItem' => true
 ]);
-
 ...
 ```
 
-Set another config file optional:
+Also, you can set certain parameters:
+
 ```php
 ...
-
-ConfigWriter::setConfig('config-writer')->write([
+ConfigWriter::of([
     'item' => 'new value',
     'nested.config.item' => 'value',
     'arrayItem' => ['Single', 'Level', 'Array', 'Values'],
     'numberItem' => 3,
     'booleanItem' => true
-]);
-
+])
+->config('config-writer')
+->strictMode(false)
+->write();
 ...
 ```
 

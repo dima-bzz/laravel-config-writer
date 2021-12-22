@@ -1,5 +1,7 @@
 <?php
 
+use DimaBzz\LaravelConfigWriter\Exceptions\ConfigWriterException;
+
 if (! function_exists('config_writer')) {
     /**
      * Write new values to the configuration file.
@@ -7,7 +9,7 @@ if (! function_exists('config_writer')) {
      * @param  dynamic  array|configName,array
      * @return bool
      *
-     * @throws \Exception
+     * @throws Exception
      */
     function config_writer(): bool
     {
@@ -23,12 +25,10 @@ if (! function_exists('config_writer')) {
 
         if (is_string($arguments[0])) {
             if (! isset($arguments[1]) || ! is_array($arguments[1])) {
-                throw new Exception(
-                    'When setting a new value in the config file, you must pass an array of key / value pairs.'
-                );
+                throw ConfigWriterException::requiredParamArray();
             }
 
-            return app('configwriter')->setConfig($arguments[0])->write($arguments[1]);
+            return app('configwriter')->of($arguments[1])->configFile($arguments[0])->write();
         }
 
         return false;

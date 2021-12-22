@@ -15,7 +15,7 @@ class ServiceProvider extends BaseServiceProvider
     {
         $this->publishes([
             __DIR__.'/../config/config-writer.php'   => config_path('config-writer.php'),
-        ]);
+        ], 'config-writer');
     }
 
     /**

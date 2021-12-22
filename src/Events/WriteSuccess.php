@@ -9,10 +9,10 @@ class WriteSuccess
      *
      * @var string
      */
-    public $name;
+    public string $configFile;
 
-    public function __construct($name)
+    public function __construct($configFile)
     {
-        $this->name = $name;
+        $this->configFile = $configFile;
     }
 }

@@ -1,10 +1,9 @@
 <?php
 
-namespace DimaBzz\LaravelConfigWriter\Tests;
+namespace DimaBzz\LaravelConfigWriter\Tests\Config;
 
-use DimaBzz\LaravelConfigWriter\Events\WriteSuccess;
+use DimaBzz\LaravelConfigWriter\Tests\TestCase;
 use Exception;
-use Illuminate\Support\Facades\Event;
 
 class ConfigWriterTest extends TestCase
 {
@@ -20,7 +19,7 @@ class ConfigWriterTest extends TestCase
             $this->configWriter->write(['connections.sqlite.driver' => 'sqlbite']);
             $this->fail();
         } catch (Exception $e) {
-            $this->assertEquals("Configuration file {$file} not found.", $e->getMessage());
+            $this->assertEquals(sprintf('Configuration file %s not found.', $file), $e->getMessage());
         }
     }
 
@@ -33,10 +32,10 @@ class ConfigWriterTest extends TestCase
         $file = 'bar';
 
         try {
-            $this->configWriter->setConfig($file)->write(['connections.sqlite.driver' => 'sqlbite']);
+            $this->configWriter->of(['connections.sqlite.driver' => 'sqlbite'])->configFile($file)->write();
             $this->fail();
         } catch (Exception $e) {
-            $this->assertEquals("Configuration file {$file} not found.", $e->getMessage());
+            $this->assertEquals(sprintf('Configuration file %s not found.', $file), $e->getMessage());
         }
     }
 
@@ -52,7 +51,7 @@ class ConfigWriterTest extends TestCase
             config_writer($file, ['connections.sqlite.driver' => 'sqlbite']);
             $this->fail();
         } catch (Exception $e) {
-            $this->assertEquals("Configuration file {$file} not found.", $e->getMessage());
+            $this->assertEquals(sprintf('Configuration file %s not found.', $file), $e->getMessage());
         }
     }
 
@@ -109,8 +108,9 @@ class ConfigWriterTest extends TestCase
             $this->configWriter->write(['connections.sqlite.driver' => 'sqlbite']);
             $this->fail();
         } catch (Exception $e) {
+            $this->assertFileIsNotWritable($this->tmpTestConfigFile);
             chmod($this->tmpTestConfigFile, 0664);
-            $this->assertEquals("The config file {$this->testConfigFile} does not support writing.", $e->getMessage());
+            $this->assertEquals(sprintf('The config file %s does not support writing.', $this->testConfigFile), $e->getMessage());
         }
     }
 
@@ -123,7 +123,7 @@ class ConfigWriterTest extends TestCase
             $this->configWriter->write(['connections.sqlite.driver' => 'sqlbite']);
             $this->fail();
         } catch (Exception $e) {
-            $this->assertEquals('Default file name not set.', $e->getMessage());
+            $this->assertEquals('Default config file name not set.', $e->getMessage());
         }
     }
 
@@ -139,7 +139,21 @@ class ConfigWriterTest extends TestCase
             file_put_contents($this->tmpTestConfigFile, '<?php return [];');
             $this->configWriter->write([$key => false]);
         } catch (Exception $e) {
-            $this->assertEquals("Unable to rewrite key {$key} in config, does it exist?", $e->getMessage());
+            $this->assertEquals(sprintf('Unable to rewrite key %s in config, does it exist?', $key), $e->getMessage());
+        }
+    }
+
+    /**
+     * @test
+     * @environment-setup usesDefaultName
+     */
+    public function testChangeStringParameterToArrayConfigFileStrictMode()
+    {
+        try {
+            $this->configWriter->of(['connections.mysql.username' => ['production']])->strictMode(true)->write();
+            $this->fail();
+        } catch (Exception $e) {
+            $this->assertEquals('Unable to rewrite key connections.mysql.username in config, write failed.', $e->getMessage());
         }
     }
 
@@ -158,32 +172,6 @@ class ConfigWriterTest extends TestCase
             $this->assertTrue(is_array($result));
             $this->assertArrayHasKey('url', $result);
             $this->assertEquals('http://octobercms.com', $result['url']);
-        } catch (Exception $e) {
-            $this->fail($e->getMessage());
-        }
-    }
-
-    /**
-     * @test
-     * @environment-setup usesDefaultName
-     */
-    public function testSendSuccessEventConfigFile()
-    {
-        try {
-            Event::fake();
-
-            $config = $this->configWriter->write(['url' => 'http://octobercms.com']);
-            $this->assertTrue($config);
-
-            $result = include $this->tmpTestConfigFile;
-
-            $this->assertTrue(is_array($result));
-            $this->assertArrayHasKey('url', $result);
-            $this->assertEquals('http://octobercms.com', $result['url']);
-
-            Event::assertDispatched(WriteSuccess::class, function ($event) {
-                return $event->name === $this->app['config']['config-writer.name'];
-            });
         } catch (Exception $e) {
             $this->fail($e->getMessage());
         }
