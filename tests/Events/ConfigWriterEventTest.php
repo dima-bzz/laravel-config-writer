@@ -1,4 +1,5 @@
 <?php
+
 namespace DimaBzz\LaravelConfigWriter\Tests\Events;
 
 use DimaBzz\LaravelConfigWriter\Events\WriteSuccess;

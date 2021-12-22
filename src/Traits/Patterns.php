@@ -1,4 +1,5 @@
 <?php
+
 namespace DimaBzz\LaravelConfigWriter\Traits;
 
 use Illuminate\Support\Arr;

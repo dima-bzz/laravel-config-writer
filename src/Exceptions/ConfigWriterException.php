@@ -1,4 +1,5 @@
 <?php
+
 namespace DimaBzz\LaravelConfigWriter\Exceptions;
 
 use Exception;

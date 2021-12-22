@@ -1,4 +1,5 @@
 <?php
+
 namespace DimaBzz\LaravelConfigWriter\Tests\Commands;
 
 use DimaBzz\LaravelConfigWriter\Tests\TestCase;
@@ -13,7 +14,7 @@ class ConfigWritePublishTest extends TestCase
         $path = config_path('config-writer').'.php';
 
         $this->artisan('vendor:publish', [
-            '--tag' => 'config-writer'
+            '--tag' => 'config-writer',
         ]);
 
         $this->assertFileExists($path);
@@ -29,7 +30,7 @@ class ConfigWritePublishTest extends TestCase
         $path = config_path('config-writer').'.php';
 
         $this->artisan('vendor:publish', [
-            '--provider' => "DimaBzz\LaravelConfigWriter\ServiceProvider"
+            '--provider' => "DimaBzz\LaravelConfigWriter\ServiceProvider",
         ]);
 
         $this->assertFileExists($path);
@@ -45,7 +46,7 @@ class ConfigWritePublishTest extends TestCase
         $path = config_path('config-writer').'.php';
 
         $this->artisan('vendor:publish', [
-            '--tag' => 'config-writer'
+            '--tag' => 'config-writer',
         ]);
 
         $config = $this->configWriter->of(['strict' => false])
@@ -57,7 +58,7 @@ class ConfigWritePublishTest extends TestCase
 
         $this->artisan('vendor:publish', [
             '--tag' => 'config-writer',
-            '--force' => true
+            '--force' => true,
         ]);
 
         $this->assertTrue(config('config-writer.strict'));
