@@ -1,0 +1,57 @@
+{
+  "name": "dima-bzz/laravel-config-writer",
+  "description": "Laravel provider to be able to rewrite configuration",
+  "keywords": [
+    "dima-bzz",
+    "laravel-config-writer"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Dmitry Mazurov",
+      "email": "dimabzz@gmail.com",
+      "homepage": "https://github.com/dima-bzz",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": "^7.0|^8.0",
+    "illuminate/filesystem": "^7.0|^8.0",
+    "illuminate/config": "^7.0|^8.0",
+    "illuminate/support": "^7.0|^8.0"
+  },
+  "require-dev": {
+    "friendsofphp/php-cs-fixer": "^2.16",
+    "orchestra/testbench": "^5.0|^6.0",
+    "phpunit/phpunit": "^9.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "DimaBzz\\LaravelConfigWriter\\": "src/"
+    },
+    "files": [
+      "src/helpers.php"
+    ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "DimaBzz\\LaravelConfigWriter\\Tests\\": "tests"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "DimaBzz\\LaravelConfigWriter\\ServiceProvider"
+      ],
+      "aliases": {
+        "ConfigWriter": "DimaBzz\\LaravelConfigWriter\\Facades\\ConfigWriter"
+      }
+    }
+  },
+  "scripts": {
+    "test": "vendor/bin/phpunit",
+    "format": "vendor/bin/php-cs-fixer fix --allow-risky=yes --config .php_cs.php"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}
