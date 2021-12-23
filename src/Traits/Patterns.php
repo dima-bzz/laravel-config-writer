@@ -16,16 +16,24 @@ trait Patterns
     {
         $patterns = [];
 
-        if (in_array($this->type, ['string', 'all'])) {
+        if (in_array('string', $this->type)) {
             $patterns[] = $this->buildStringExpression($key, $items);
             $patterns[] = $this->buildStringExpression($key, $items, '"');
         }
 
-        if (in_array($this->type, ['constant', 'all'])) {
-            $patterns[] = $this->buildConstantExpression($key, $items);
+        if (in_array('boolean', $this->type)) {
+            $patterns[] = $this->buildBooleanExpression($key, $items);
         }
 
-        if (in_array($this->type, ['array', 'all'])) {
+        if (in_array('nullable', $this->type)) {
+            $patterns[] = $this->buildNullableExpression($key, $items);
+        }
+
+        if (in_array('integer', $this->type)) {
+            $patterns[] = $this->buildIntegerExpression($key, $items);
+        }
+
+        if (in_array('array', $this->type)) {
             $patterns[] = $this->buildArrayExpression($key, $items);
         }
 
@@ -39,22 +47,25 @@ trait Patterns
      */
     protected function writeValueToPhp($value, bool $setType = false): string
     {
-        $type = 'all';
+        $type = [];
 
         if (is_string($value) && ! Str::contains($value, "'")) {
-            $type = 'string';
+            $type = ['string', 'nullable'];
             $replaceValue = "'".$value."'";
         } elseif (is_string($value) && ! Str::contains($value, '"') === false) {
-            $type = 'string';
+            $type = ['string', 'nullable'];
             $replaceValue = '"'.$value.'"';
         } elseif (is_bool($value)) {
-            $type = 'constant';
+            $type = ['boolean'];
             $replaceValue = ($value ? 'true' : 'false');
         } elseif (is_null($value)) {
-            $type = 'constant';
+            $type = ['string', 'integer', 'nullable'];
             $replaceValue = 'null';
+        } elseif (is_int($value)) {
+            $type = ['integer', 'nullable'];
+            $replaceValue = $value;
         } elseif (is_array($value) && count($value) === count($value, COUNT_RECURSIVE)) {
-            $type = 'array';
+            $type = ['array'];
             $replaceValue = $this->writeArrayToPhp($value);
         } else {
             $replaceValue = $value;
@@ -123,13 +134,13 @@ trait Patterns
     }
 
     /**
-     * Common constants only (true, false, null, integers).
+     * Common constants only (true, false).
      *
      * @param string $targetKey
      * @param array $arrayItems
      * @return string
      */
-    protected function buildConstantExpression(string $targetKey, array $arrayItems = []): string
+    protected function buildBooleanExpression(string $targetKey, array $arrayItems = []): string
     {
         $expression = [];
 
@@ -140,7 +151,53 @@ trait Patterns
         $expression[] = '([\'|"]'.$targetKey.'[\'|"]\s*=>\s*)';
 
         // The target value to be replaced ($3)
-        $expression[] = '([tT][rR][uU][eE]|[fF][aA][lL][sS][eE]|[nN][uU][lL]{2}|[\d]+)';
+        $expression[] = '([tT][rR][uU][eE]|[fF][aA][lL][sS][eE])';
+
+        return '/'.implode('', $expression).'/';
+    }
+
+    /**
+     * Common constants only null.
+     *
+     * @param string $targetKey
+     * @param array $arrayItems
+     * @return string
+     */
+    protected function buildNullableExpression(string $targetKey, array $arrayItems = []): string
+    {
+        $expression = [];
+
+        // Opening expression for array items ($1)
+        $expression[] = $this->buildArrayOpeningExpression($arrayItems);
+
+        // The target key opening ($2)
+        $expression[] = '([\'|"]'.$targetKey.'[\'|"]\s*=>\s*)';
+
+        // The target value to be replaced ($3)
+        $expression[] = '([nN][uU][lL]{2})';
+
+        return '/'.implode('', $expression).'/';
+    }
+
+    /**
+     * Common constants only integers.
+     *
+     * @param string $targetKey
+     * @param array $arrayItems
+     * @return string
+     */
+    protected function buildIntegerExpression(string $targetKey, array $arrayItems = []): string
+    {
+        $expression = [];
+
+        // Opening expression for array items ($1)
+        $expression[] = $this->buildArrayOpeningExpression($arrayItems);
+
+        // The target key opening ($2)
+        $expression[] = '([\'|"]'.$targetKey.'[\'|"]\s*=>\s*)';
+
+        // The target value to be replaced ($3)
+        $expression[] = '([\d]+)';
 
         return '/'.implode('', $expression).'/';
     }

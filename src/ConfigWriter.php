@@ -13,6 +13,8 @@ class ConfigWriter
 {
     use Patterns;
 
+    const TYPES = ['string', 'boolean', 'nullable', 'integer', 'array'];
+
     /**
      * @var string
      */
@@ -24,9 +26,9 @@ class ConfigWriter
     protected string $configPath;
 
     /**
-     * @var string
+     * @var array
      */
-    protected string $type = 'all';
+    protected array $type = self::TYPES;
 
     /**
      * @var null|string
@@ -174,7 +176,7 @@ class ConfigWriter
         $newContent = $this->updateContent($patterns, $result, $replaceValue, $count);
 
         if (! $this->strictMode && $count === 0) {
-            $this->type = 'all';
+            $this->type = self::TYPES;
             $patterns = $this->getPatterns($key, $items);
             $newContent = $this->updateContent($patterns, $result, $replaceValue, $count);
         }

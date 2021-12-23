@@ -91,16 +91,6 @@ class ConfigWriterTest extends TestCase
      * @test
      * @environment-setup usesDefaultName
      */
-    public function testEmptyParamConfigFileByHelpers()
-    {
-        $config = config_writer();
-        $this->assertFalse($config);
-    }
-
-    /**
-     * @test
-     * @environment-setup usesDefaultName
-     */
     public function testNotWritableConfigFile()
     {
         try {
@@ -154,6 +144,188 @@ class ConfigWriterTest extends TestCase
             $this->fail();
         } catch (Exception $e) {
             $this->assertEquals('Unable to rewrite key connections.mysql.username in config, write failed.', $e->getMessage());
+        }
+    }
+
+    /**
+     * @test
+     * @environment-setup usesDefaultName
+     */
+    public function testEmptyParamConfigFileByHelpers()
+    {
+        $config = config_writer();
+        $this->assertFalse($config);
+    }
+
+    /**
+     * @test
+     * @environment-setup usesDefaultName
+     */
+    public function testChangeParameterToNullConfigFileStrictMode()
+    {
+        try {
+            $data = [
+                'url' => null,
+                'aNumber' => null,
+            ];
+
+            $config = $this->configWriter->of($data)->strictMode(true)->write();
+            $this->assertTrue($config);
+
+            $result = include $this->tmpTestConfigFile;
+
+            $this->assertArrayHasKey('url', $result);
+            $this->assertArrayHasKey('aNumber', $result);
+            $this->assertNull($result['url']);
+            $this->assertNull($result['aNumber']);
+        } catch (Exception $e) {
+            $this->fail($e->getMessage());
+        }
+    }
+
+    /**
+     * @test
+     * @environment-setup usesDefaultName
+     */
+    public function testChangeNullParameterToIntegerConfigFileStrictMode()
+    {
+        try {
+            $data = [
+                'nullable' => 666,
+            ];
+
+            $config = $this->configWriter->of($data)->strictMode(true)->write();
+            $this->assertTrue($config);
+
+            $result = include $this->tmpTestConfigFile;
+
+            $this->assertArrayHasKey('nullable', $result);
+            $this->assertEquals(666, $result['nullable']);
+        } catch (Exception $e) {
+            $this->fail($e->getMessage());
+        }
+    }
+
+    /**
+     * @test
+     * @environment-setup usesDefaultName
+     */
+    public function testChangeNullParameterToStringConfigFileStrictMode()
+    {
+        try {
+            $data = [
+                'nullable' => 'foo',
+            ];
+
+            $config = $this->configWriter->of($data)->strictMode(true)->write();
+            $this->assertTrue($config);
+
+            $result = include $this->tmpTestConfigFile;
+
+            $this->assertArrayHasKey('nullable', $result);
+            $this->assertEquals('foo', $result['nullable']);
+        } catch (Exception $e) {
+            $this->fail($e->getMessage());
+        }
+    }
+
+    /**
+     * @test
+     * @environment-setup usesDefaultName
+     */
+    public function testChangeArrayParameterToNullConfigFileStrictMode()
+    {
+        try {
+            $data = [
+                'connections.mysql.driver' => null,
+            ];
+
+            $this->configWriter->of($data)->strictMode(true)->write();
+            $this->fail();
+        } catch (Exception $e) {
+            $this->assertEquals('Unable to rewrite key connections.mysql.driver in config, write failed.', $e->getMessage());
+        }
+    }
+
+    /**
+     * @test
+     * @environment-setup usesDefaultName
+     */
+    public function testChangeBooleanParameterToNullConfigFileStrictMode()
+    {
+        try {
+            $data = [
+                'debug' => null,
+            ];
+
+            $this->configWriter->of($data)->strictMode(true)->write();
+            $this->fail();
+        } catch (Exception $e) {
+            $this->assertEquals('Unable to rewrite key debug in config, write failed.', $e->getMessage());
+        }
+    }
+
+    /**
+     * @test
+     * @environment-setup usesDefaultName
+     */
+    public function testChangeStringParameterToBooleanConfigFile()
+    {
+        try {
+            $config = $this->configWriter->write(['connections.mysql.host' => false]);
+            $this->assertTrue($config);
+
+            $result = include $this->tmpTestConfigFile;
+
+            $this->assertArrayHasKey('connections', $result);
+            $this->assertArrayHasKey('mysql', $result['connections']);
+            $this->assertArrayHasKey('host', $result['connections']['mysql']);
+            $this->assertFalse($result['connections']['mysql']['host']);
+        } catch (Exception $e) {
+            $this->fail($e->getMessage());
+        }
+    }
+
+    /**
+     * @test
+     * @environment-setup usesDefaultName
+     */
+    public function testChangeStringParameterToNullConfigFile()
+    {
+        try {
+            $config = $this->configWriter->write(['connections.sqlite.driver' => null]);
+            $this->assertTrue($config);
+
+            $result = include $this->tmpTestConfigFile;
+
+            $this->assertArrayHasKey('connections', $result);
+            $this->assertArrayHasKey('sqlite', $result['connections']);
+            $this->assertArrayHasKey('driver', $result['connections']['sqlite']);
+            $this->assertNull($result['connections']['sqlite']['driver']);
+        } catch (Exception $e) {
+            $this->fail($e->getMessage());
+        }
+    }
+
+    /**
+     * @test
+     * @environment-setup usesDefaultName
+     */
+    public function testChangeStringParameterToArrayConfigFile()
+    {
+        try {
+            $config = $this->configWriter->write(['connections.mysql.username' => ['production']]);
+            $this->assertTrue($config);
+
+            $result = include $this->tmpTestConfigFile;
+
+            $this->assertArrayHasKey('connections', $result);
+            $this->assertArrayHasKey('mysql', $result['connections']);
+            $this->assertArrayHasKey('username', $result['connections']['mysql']);
+            $this->assertIsArray($result['connections']['mysql']['username']);
+            $this->assertEquals('production', $result['connections']['mysql']['username'][0]);
+        } catch (Exception $e) {
+            $this->fail($e->getMessage());
         }
     }
 
@@ -233,70 +405,6 @@ class ConfigWriterTest extends TestCase
             $this->assertArrayHasKey('mysql', $result['connections']);
             $this->assertArrayHasKey('host', $result['connections']['mysql']);
             $this->assertEquals('127.0.0.1', $result['connections']['mysql']['host']);
-        } catch (Exception $e) {
-            $this->fail($e->getMessage());
-        }
-    }
-
-    /**
-     * @test
-     * @environment-setup usesDefaultName
-     */
-    public function testChangeStringParameterToBoolConfigFile()
-    {
-        try {
-            $config = $this->configWriter->write(['connections.mysql.host' => false]);
-            $this->assertTrue($config);
-
-            $result = include $this->tmpTestConfigFile;
-
-            $this->assertArrayHasKey('connections', $result);
-            $this->assertArrayHasKey('mysql', $result['connections']);
-            $this->assertArrayHasKey('host', $result['connections']['mysql']);
-            $this->assertFalse($result['connections']['mysql']['host']);
-        } catch (Exception $e) {
-            $this->fail($e->getMessage());
-        }
-    }
-
-    /**
-     * @test
-     * @environment-setup usesDefaultName
-     */
-    public function testChangeStringParameterToNullConfigFile()
-    {
-        try {
-            $config = $this->configWriter->write(['connections.sqlite.driver' => null]);
-            $this->assertTrue($config);
-
-            $result = include $this->tmpTestConfigFile;
-
-            $this->assertArrayHasKey('connections', $result);
-            $this->assertArrayHasKey('sqlite', $result['connections']);
-            $this->assertArrayHasKey('driver', $result['connections']['sqlite']);
-            $this->assertNull($result['connections']['sqlite']['driver']);
-        } catch (Exception $e) {
-            $this->fail($e->getMessage());
-        }
-    }
-
-    /**
-     * @test
-     * @environment-setup usesDefaultName
-     */
-    public function testChangeStringParameterToArrayConfigFile()
-    {
-        try {
-            $config = $this->configWriter->write(['connections.mysql.username' => ['production']]);
-            $this->assertTrue($config);
-
-            $result = include $this->tmpTestConfigFile;
-
-            $this->assertArrayHasKey('connections', $result);
-            $this->assertArrayHasKey('mysql', $result['connections']);
-            $this->assertArrayHasKey('username', $result['connections']['mysql']);
-            $this->assertIsArray($result['connections']['mysql']['username']);
-            $this->assertEquals('production', $result['connections']['mysql']['username'][0]);
         } catch (Exception $e) {
             $this->fail($e->getMessage());
         }
