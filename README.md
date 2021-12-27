@@ -15,7 +15,7 @@ The following value types are supported for writing: strings, integers, booleans
 
 ## Support
 
-This provider is designed to be used in Laravel from `7.0 and 8.0` version.
+This provider is designed to be used in Laravel from `7.4 and 8.0` version.
 
 ## Setup
 
