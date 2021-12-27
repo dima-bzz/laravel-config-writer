@@ -11,7 +11,7 @@ This library adds the ability to write to configuration files.
 
 You can rewrite array values inside a basic configuration file that returns a single array definition (like a Laravel config file) whilst maintaining the file integrity, leaving comments and advanced settings intact.
 
-The following value types are supported for writing: strings, integers, booleans and single-dimension arrays.
+The following value types are supported for writing: strings, integers, booleans and arrays.
 
 ## Support
 
