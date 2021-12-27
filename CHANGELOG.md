@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.1 - 2021-12-27
+
+- Updated patterns.
+- Updated tests.
+
+**Full Changelog**: https://github.com/dima-bzz/laravel-config-writer/compare/0.3.0...0.3.1
+
 ## 0.3.0 - 2021-12-23
 
 - Updated patterns.
