@@ -16,25 +16,16 @@ trait Patterns
     {
         $patterns = [];
 
-        if (in_array('string', $this->type)) {
-            $patterns[] = $this->buildStringExpression($key, $items);
-            $patterns[] = $this->buildStringExpression($key, $items, '"');
-        }
+        foreach ($this->type as $type) {
+            $build = sprintf('build%sExpression', Str::ucfirst($type));
 
-        if (in_array('boolean', $this->type)) {
-            $patterns[] = $this->buildBooleanExpression($key, $items);
-        }
+            if (method_exists($this, $build)) {
+                $patterns[] = $this->{$build}($key, $items);
 
-        if (in_array('nullable', $this->type)) {
-            $patterns[] = $this->buildNullableExpression($key, $items);
-        }
-
-        if (in_array('integer', $this->type)) {
-            $patterns[] = $this->buildIntegerExpression($key, $items);
-        }
-
-        if (in_array('array', $this->type)) {
-            $patterns[] = $this->buildArrayExpression($key, $items);
+                if ($type === 'string') {
+                    $patterns[] = $this->{$build}($key, $items, '"');
+                }
+            }
         }
 
         return $patterns;

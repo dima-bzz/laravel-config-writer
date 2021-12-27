@@ -41,13 +41,13 @@ class TestCase extends Orchestra
     protected function usesDefaultName($app)
     {
         $app->config->set('config-writer.config_file', $this->testConfigFile);
-        $app->config->set('config-writer.strict', false);
+        $app->config->set('config-writer.strict', true);
     }
 
     protected function usesNotExistsName($app)
     {
         $app->config->set('config-writer.config_file', 'foo');
-        $app->config->set('config-writer.strict', false);
+        $app->config->set('config-writer.strict', true);
     }
 
     protected function tearDown(): void
